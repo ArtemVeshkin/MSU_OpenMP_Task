@@ -50,6 +50,7 @@ private:
 
 Error initGridT1(const Grid& gridT0, Grid& gridT1, const GridApplier& applier, double timeStep) {
     Error error = Error();
+    #pragma omp parallel for
     for (size_t i = 1; i < gridT1.xSize - 1; ++i) {
         for (size_t j = 1; j < gridT1.ySize - 1; ++j) {
             for (size_t k = 1; k < gridT1.zSize - 1; ++k) {
