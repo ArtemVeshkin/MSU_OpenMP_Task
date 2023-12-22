@@ -159,9 +159,8 @@ int main(int argc, char *argv[]) {
     for (size_t t = 2; t < params.timeGridSize; ++t) {
 
         for (int dim = 0; dim < 3; ++dim) {
-            int prevThread, curThread, nextThread;
-            MPI_Cart_shift(gridComm, dim, 1, &curThread, &nextThread);
-            MPI_Cart_shift(gridComm, dim, -1, &curThread, &prevThread);
+            int prevThread, nextThread;
+            MPI_Cart_shift(gridComm, dim, 1, &prevThread, &nextThread);
 
             MPI_Request request;
             MPI_Isend(prevGrid.getPtr(1, 1, 1), 1, subarrayTypes[dim], prevThread, 2 * dim, MPI_COMM_WORLD, &request);
