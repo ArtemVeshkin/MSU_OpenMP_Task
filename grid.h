@@ -11,13 +11,17 @@ public:
     size_t xSize, ySize, zSize;
     double xStep, yStep, zStep;
 
-    explicit Grid(Params params) {
-        xSize = ySize = zSize = params.gridSize;
+    Grid(const Params& params, size_t xSize, size_t ySize, size_t zSize) {
+        this->xSize = xSize;
+        this->ySize = ySize;
+        this->zSize = zSize;
         xStep = params.Lx / (double) xSize;
         yStep = params.Ly / (double) ySize;
         zStep = params.Lz / (double) zSize;
         gridValues = new double[xSize * ySize * zSize];
     }
+
+    explicit Grid(const Params& params) : Grid(params, params.gridSize, params.gridSize, params.gridSize) {}
 
     void clearGrid() {
         #pragma omp parallel for
@@ -28,6 +32,10 @@ public:
 
     double get(size_t i, size_t j, size_t k) const {
         return gridValues[getIdx(i, j, k)];
+    }
+
+    double* getPtr(size_t i, size_t j, size_t k) {
+        return &gridValues[getIdx(i, j, k)];
     }
 
     void set(size_t i, size_t j, size_t k, double value) {

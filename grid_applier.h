@@ -29,14 +29,25 @@ public:
                  t);
     }
 
-    void applyOnGrid(Grid &grid, double t) const {
+    void applyOnGrid(Grid &grid, double t, size_t *coordShift) const {
         #pragma omp parallel for
         for (size_t i = 0; i < grid.xSize; ++i) {
             for (size_t j = 0; j < grid.ySize; ++j) {
                 for (size_t k = 0; k < grid.zSize; ++k) {
-                    grid.set(i, j, k, applyOnGridPoint(grid, i, j, k, t));
+                    double value = applyOnGridPoint(
+                            grid,
+                            i + coordShift[0] - 1,
+                            j + coordShift[1] - 1,
+                            k + coordShift[2] - 1,
+                            t);
+                    grid.set(i, j, k, value);
                 }
             }
         }
+    }
+
+    void applyOnGrid(Grid &grid, double t) const {
+        size_t coordShift[3] = {0, 0, 0};
+        applyOnGrid(grid, t, coordShift);
     }
 };
