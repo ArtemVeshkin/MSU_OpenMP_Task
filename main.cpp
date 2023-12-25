@@ -157,22 +157,20 @@ int main(int argc, char *argv[]) {
 
     Grid newGrid(params, paddedBlockSize[0], paddedBlockSize[1], paddedBlockSize[2]);
     for (size_t t = 2; t < params.timeGridSize; ++t) {
-
+        int nSends = 0;
+        MPI_Request requests[2 * 3];
         for (int dim = 0; dim < 3; ++dim) {
             int prevThread, nextThread;
             MPI_Cart_shift(gridComm, dim, 1, &prevThread, &nextThread);
 
-            MPI_Request request;
-            MPI_Isend(prevGrid.getPtr(1, 1, 1), 1, subarrayTypes[dim], prevThread, 2 * dim, MPI_COMM_WORLD, &request);
-            MPI_Request_free(&request);
+            MPI_Isend(prevGrid.getPtr(1, 1, 1), 1, subarrayTypes[dim], prevThread, 2 * dim, MPI_COMM_WORLD, &requests[nSends++]);
 
             double* outRightBorderPtr = prevGrid.getPtr(
                     dim == 0 ? blockSize[dim] : 1,
                     dim == 1 ? blockSize[dim] : 1,
                     dim == 2 ? blockSize[dim] : 1
             );
-            MPI_Isend(outRightBorderPtr, 1, subarrayTypes[dim], nextThread, 2 * dim + 1, MPI_COMM_WORLD, &request);
-            MPI_Request_free(&request);
+            MPI_Isend(outRightBorderPtr, 1, subarrayTypes[dim], nextThread, 2 * dim + 1, MPI_COMM_WORLD, &requests[nSends++]);
 
             double* inLeftBorderPtr = prevGrid.getPtr(
                     dim == 0 ? 0 : 1,
@@ -215,6 +213,9 @@ int main(int argc, char *argv[]) {
 
         prevGrid.moveValues(curGrid);
         curGrid.moveValues(newGrid);
+
+        MPI_Status statuses[nSends];
+        MPI_Waitall(nSends, requests, statuses);
     }
     double endTime = MPI_Wtime();
     double taskWorkTime = endTime - startTime;
