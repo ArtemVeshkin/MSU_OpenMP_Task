@@ -8,7 +8,7 @@ mpisubmit.pl -t 8 main.out --stdout std.out --stderr std.err -- 128 20 1. 1. 1. 
 ```
 Сборка и запуск на IBM Polus (версия с MPI + OpenMP):
 ```bash
-mpixlC -o main.out main.cpp -qsmp=omp -std=c++11
+mpixlC -o main.out main.cpp -qsmp=omp -std=c++11 -O3
 mpisubmit.pl -t 4 -p 4 main.out --stdout std.out --stderr std.err -- 128 20 1. 1. 1. 0.1
 ```
 
